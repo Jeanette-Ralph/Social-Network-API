@@ -1,11 +1,23 @@
 const router = require('express').Router();
 
-// GET route
+// /api/users
 
-// POST route
+// GET route for all users
 
-// PUT route
+// GET route for a single user by it's id
 
-// DELETE route
+// POST route to create a new user
+
+// PUT route to update a user by it's id
+
+// DELETE route to remove a user by it's id
+
+
+
+// /api/users/:userId/friends/:friendId
+
+// POST route add a new friend to the users list
+
+// DELETE route to remove a friend from the users list
 
 module.exports = router;

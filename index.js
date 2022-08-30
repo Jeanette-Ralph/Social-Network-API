@@ -5,6 +5,7 @@ const routes = require('./routes');
 const cwd = process.cwd();
 
 const PORT = process.env.PORT || 3001;
+const activity = 'Social Network API';
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
