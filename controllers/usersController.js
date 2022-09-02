@@ -33,9 +33,7 @@ module.exports = {
             .then(async (user) =>
                 !user
                     ? res.status(404).json({ message: 'No user with that ID!' })
-                    : res.json({
-                        user
-                    })
+                    : res.json(user)
             )
             .catch((err) => {
                 console.log(err);
@@ -68,19 +66,15 @@ module.exports = {
     // deleting a user by it's id
     deleteUser(req, res) {
         User.findOneAndDelete({ _id: req.params.userId })
-            .then((user) =>
-                !user
-                    .then(res.status(404).json({ message: 'No user with that ID!' }))
-            )
+            .then(() => res.status(200).json({ message: 'User deleted successfully' }))
             .catch((err) => res.status(500).json(err));
     },
 
-
     // add a new friend to the users list
-    addFriend(req, res) {
+    createFriend(req, res) {
         User.findOneAndUpdate(
             { _id: req.params.userId },
-            { $addToSet: { friends: req.body } },
+            { $addToSet: { friends: req.params.friendId } },
             { runValidators: true, new: true }
         )
             .then((user) =>
@@ -94,18 +88,20 @@ module.exports = {
     },
 
     // remove a friend from the users list
-    removeFriend(req, res) {
+    deleteFriend(req, res) {
         User.findOneAndUpdate(
             { _id: req.params.userId },
-            { $pull: { friends: { friendId: req.params.friendId } } },
+            { $pull: { friends: req.params.friendId } },
             { runValidators: true, new: true }
         )
-            .then((user) =>
+            .then((user) => {
+                console.log(user)
                 !user
                     ? res
                         .status(404)
                         .json({ message: 'No user found with that ID!' })
                     : res.json(user)
+            }
             )
             .catch((err) => res.status(500).json(err));
     },

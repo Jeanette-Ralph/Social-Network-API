@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongoose').Types;
-const { Thought } = require('../models');
+const { Thought, User } = require('../models');
 
 // Aggregate function to get the total number of thoughts 
 const totalThoughts = async () =>
@@ -18,7 +18,7 @@ module.exports = {
                     totalThoughts: await totalThoughts(),
                 };
 
-                return res.json(thoughtObjs);
+                return res.json(thoughtObj);
             })
             .catch((err) => {
                 console.log(err);
@@ -45,7 +45,15 @@ module.exports = {
 
     // creating a new thought
     createThought(req, res) {
+        // req.body needs to have userId with it
         Thought.create(req.body)
+            // add the thought to the users thoughts array
+            .then(dbThought => {
+                return User.findOneAndUpdate(
+                    { username: req.body.username },
+                    { $push: { thoughts: dbThought._id } },
+                    { new: true });
+            })
             .then((thought) => res.json(thought))
             .catch((err) => res.status(500).json(err));
     },
@@ -76,9 +84,7 @@ module.exports = {
     },
 
     // creating a reaction stored in a single thought's reactions array field
-    addReaction(req, res) {
-        console.log('You are creating a reaction!');
-        console.log(req.body);
+    createReaction(req, res) {
         Thought.findOneAndUpdate(
             { _id: req.params.thoughtId },
             { $addToSet: { reactions: req.body } },
@@ -95,20 +101,21 @@ module.exports = {
     },
 
     // removing a reaction by the reaction's reactionId value from the thought
-    removeReaction(req, res) {
+    deleteReaction(req, res) {
         Thought.findOneAndUpdate(
             { _id: req.params.thoughtId },
-            { $pull: { reactions: { reactionId: req.params.reactionId } } },
+            { $pull: { reactions: { _id: req.params.reactionId } } },
             { runValidators: true, new: true }
         )
-            .then((thought) =>
+            .then((thought) => {
+                console.log(thought)
                 !thought
                     ? res
                         .status(404)
                         .json({ message: 'No thought found with that ID!' })
                     : res.json(thought)
+            }
             )
             .catch((err) => res.status(500).json(err));
     },
-
 };
